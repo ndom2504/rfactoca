@@ -393,20 +393,20 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             val prKg = rates?.prixParKg ?: 15.0
             val livLoc = rates?.livraisonLocale ?: 8.0
             val currentAssuranceBase = rates?.assurance ?: 5.0
-            
+
             // Logic: Base price by weight + delivery
             val base = weight * prKg
             val deliveryExtra = if (mode == "LIVRAISON_DOMICILE") livLoc else 0.0
-            
-            // Insurance logic: 5$ base if > 200$ + 1% of value if > 1000$
+
+            // Insurance logic: 5$ base if > 200$ + 2% of value if > 1000$
             var insuranceExtra = 0.0
             if (valDecl > 200.0) {
                 insuranceExtra = currentAssuranceBase
                 if (valDecl > 1000.0) {
-                    insuranceExtra += (valDecl * 0.01) // 1% extra insurance for high value
+                    insuranceExtra += (valDecl * 0.02) // 2% extra insurance for high value
                 }
             }
-            
+
             declEstimatedPrice.value = base + deliveryExtra + insuranceExtra
             _navigationRoute.value = "declaration_payment"
         }
