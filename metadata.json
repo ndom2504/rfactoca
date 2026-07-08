@@ -1,0 +1,6 @@
+{
+  "name": "RFacto",
+  "description": "Expédition de colis entre le Canada et le monde simple, transparente et traçable.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

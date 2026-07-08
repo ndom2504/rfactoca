@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "779369955873",
+    "project_id": "rfacto-db204",
+    "storage_bucket": "rfacto-db204.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:779369955873:android:8ce2baeecb8ba766025960",
+        "android_client_info": {
+          "package_name": "com.rfacto.shipping"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "779369955873-a0bk4ptjueguejk963q780tut23uuph4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rfacto.shipping",
+            "certificate_hash": "64c2fcbccd888865f6eff26c5a37fe003d8295cc"
+          }
+        },
+        {
+          "client_id": "779369955873-b98erlckafv6vjmeg578ujtet31m3856.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeHl7Dd9NIb8Wvwm25s78-88Ev33NgFyw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "779369955873-b98erlckafv6vjmeg578ujtet31m3856.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

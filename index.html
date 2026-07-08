@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFacto Logistique Canada | Transport & Suivi de Colis</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        rfacto: {
+                            primary: '#005FB0',     // Sleek Blue
+                            primaryDark: '#004B8C', // Deeper Blue
+                            secondary: '#001B3D',   // Dark Indigo
+                            tertiary: '#F2E0FF',    // Soft Lavender
+                            slateLight: '#FDFBFF',  // Sleek off-white bg
+                            slateDark: '#0B1220',   // Deep sleek navy bg
+                            cardDark: '#131D31',    // Sleek navy card bg
+                            borderDark: '#1E293B',
+                            accent: '#FF8A00'       // Bright Orange Accent
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0B1220;
+            color: #E2E8F0;
+        }
+        .status-badge {
+            transition: all 0.3s ease;
+        }
+        /* Hide scrollbars but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-rfacto-slateDark min-h-screen flex flex-col antialiased">
+
+    <!-- TOP ANNOUNCEMENT BAR -->
+    <div class="bg-rfacto-secondary border-b border-rfacto-borderDark py-2.5 px-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left">
+            <div class="flex items-center gap-2 text-xs text-slate-300 justify-center">
+                <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span><strong>Service actif :</strong> Expéditions hebdomadaires du Canada vers le Gabon et l'Europe.</span>
+            </div>
+            
+            <div class="flex items-center gap-4 text-xs justify-center">
+                <a href="https://wa.me/15814439464" target="_blank" class="text-slate-300 hover:text-white font-bold flex items-center gap-1.5 transition-colors">
+                    <i class="fa-brands fa-whatsapp text-emerald-400"></i>
+                    <span>+1 581 443 9464</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <nav class="bg-rfacto-slateDark border-b border-rfacto-borderDark py-4 px-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="flex items-center gap-3">
+                <div class="size-10 bg-rfacto-primary text-white font-extrabold flex items-center justify-center rounded-xl shadow-lg shadow-rfacto-primary/20">
+                    <span class="text-xl">R</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black tracking-tight text-white leading-none">Rfacto</h1>
+                    <span class="text-[9px] font-bold tracking-[2px] text-slate-400">LOGISTIQUE CANADA</span>
+                </div>
+            </a>
+            
+            <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-300">
+                <a href="#services" class="hover:text-rfacto-primary transition-colors">Nos services</a>
+                <a href="#tarifs" class="hover:text-rfacto-primary transition-colors">Calculateur</a>
+                <a href="#trackingSection" class="hover:text-rfacto-primary transition-colors">Suivre un colis</a>
+                <a href="#downloadApp" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl border border-slate-700 transition-all text-xs">Télécharger l'application</a>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="https://wa.me/15814439464" target="_blank" class="bg-[#25D366] text-white size-10 rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-[#25D366]/10" title="Contactez-nous sur WhatsApp">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                </a>
+                <a href="#downloadApp" class="bg-rfacto-primary hover:bg-rfacto-primaryDark text-white px-4 py-2 rounded-xl font-bold text-xs shadow-lg shadow-rfacto-primary/10 transition-all">
+                    Obtenir l'application
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN WRAPPER -->
+    <main class="flex-grow">
+
+        <!-- HERO SECTION & PUBLIC TRACKING -->
+        <section class="relative bg-gradient-to-b from-rfacto-secondary to-rfacto-slateDark pt-16 pb-20 px-6 border-b border-rfacto-borderDark">
+            <div class="max-w-4xl mx-auto text-center">
+                <span class="bg-rfacto-primary/20 text-rfacto-primary text-xs font-extrabold px-3 py-1 rounded-full border border-rfacto-primary/30 uppercase tracking-widest inline-block mb-4">
+                    Canada vers l'Afrique de l'Ouest & Centrale
+                </span>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight mb-6">
+                    Expédiez vos colis du Canada <br class="hidden md:inline"> en toute <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-rfacto-primary">fiabilité & sérénité</span>
+                </h1>
+                <p class="text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+                    RFacto simplifie la logistique de vos colis (Aérien & Maritime). Déclarez, payez et suivez le transit de vos marchandises en temps réel depuis notre plateforme web et mobile.
+                </p>
+
+                <!-- PUBLIC COLLIS TRACKER INPUT CARD -->
+                <div id="trackingSection" class="max-w-2xl mx-auto bg-rfacto-cardDark p-1.5 rounded-2xl shadow-2xl border border-rfacto-borderDark flex flex-col md:flex-row gap-2">
+                    <div class="flex-grow flex items-center gap-3 px-4 py-2.5">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                        <input id="publicTrackingInput" type="text" placeholder="Entrez un numéro de suivi (ex: RF-44512-CA)..." class="bg-transparent text-white font-semibold placeholder-slate-500 text-sm focus:outline-none w-full">
+                    </div>
+                    <button onclick="trackPublicParcel()" class="bg-rfacto-primary hover:bg-rfacto-primaryDark text-white font-bold text-sm px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                        <span>Suivre Colis</span>
+                    </button>
+                </div>
+                <div class="mt-3 flex justify-center gap-4 text-xs text-slate-400">
+                    <span>Exemples : <button onclick="fillAndTrack('RF-44512-CA')" class="text-rfacto-primary underline hover:text-sky-400 font-semibold">RF-44512-CA</button>, <button onclick="fillAndTrack('RF-22871-CA')" class="text-rfacto-primary underline hover:text-sky-400 font-semibold">RF-22871-CA</button></span>
+                </div>
+            </div>
+
+            <!-- TIMELINE VISUALIZER (DYNAMICALLY FILLED) -->
+            <div id="trackingResultArea" class="hidden max-w-2xl mx-auto mt-10 bg-rfacto-cardDark p-6 rounded-2xl border border-rfacto-borderDark shadow-xl text-left">
+                <div class="flex justify-between items-start border-b border-rfacto-borderDark pb-4 mb-5">
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Résultat de Suivi</h4>
+                        <span id="trackResultCode" class="text-lg font-black text-white font-mono">RF-00000-CA</span>
+                    </div>
+                    <span id="trackResultBadge" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
+                        Inconnu
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-xs text-slate-300">
+                    <div><strong>Contenu :</strong> <span id="trackResultContent">...</span></div>
+                    <div><strong>Poids :</strong> <span id="trackResultWeight">...</span></div>
+                    <div><strong>Destination :</strong> <span id="trackResultDest">...</span></div>
+                    <div><strong>Mode :</strong> <span id="trackResultMode">...</span></div>
+                </div>
+
+                <!-- Vertical Timeline -->
+                <div class="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-rfacto-borderDark">
+                    <!-- Step 1: Déclaré -->
+                    <div class="flex gap-4 relative">
+                        <div id="stepDot1" class="size-6 rounded-full bg-slate-700 border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-white z-10 font-bold">1</div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-200">Colis Déclaré par le Client</h5>
+                            <p class="text-[10px] text-slate-400">Le client a enregistré le colis et préparé son envoi.</p>
+                            <span id="stepDate1" class="text-[9px] text-slate-500 font-mono">--/--/----</span>
+                        </div>
+                    </div>
+                    <!-- Step 2: Reçu Transit -->
+                    <div class="flex gap-4 relative">
+                        <div id="stepDot2" class="size-6 rounded-full bg-slate-700 border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-white z-10 font-bold">2</div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-200">Reçu au Dépôt Transit (Canada)</h5>
+                            <p class="text-[10px] text-slate-400">Le colis a été pris en charge physiquement par notre équipe au Canada.</p>
+                            <span id="stepDate2" class="text-[9px] text-slate-500 font-mono">--/--/----</span>
+                        </div>
+                    </div>
+                    <!-- Step 3: Expédié / Transit -->
+                    <div class="flex gap-4 relative">
+                        <div id="stepDot3" class="size-6 rounded-full bg-slate-700 border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-white z-10 font-bold">3</div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-200">En cours d'expédition (Maritime/Aérien)</h5>
+                            <p class="text-[10px] text-slate-400">En cours de transit international vers le pays de destination.</p>
+                            <span id="stepDate3" class="text-[9px] text-slate-500 font-mono">--/--/----</span>
+                        </div>
+                    </div>
+                    <!-- Step 4: Arrivé Local -->
+                    <div class="flex gap-4 relative">
+                        <div id="stepDot4" class="size-6 rounded-full bg-slate-700 border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-white z-10 font-bold">4</div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-200">Arrivé au Point Relais Local</h5>
+                            <p class="text-[10px] text-slate-400">Le colis est disponible pour le retrait ou livraison.</p>
+                            <span id="stepDate4" class="text-[9px] text-slate-500 font-mono">--/--/----</span>
+                        </div>
+                    </div>
+                    <!-- Step 5: Livré -->
+                    <div class="flex gap-4 relative">
+                        <div id="stepDot5" class="size-6 rounded-full bg-slate-700 border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-white z-10 font-bold">5</div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-200">Livré & Clôturé</h5>
+                            <p class="text-[10px] text-slate-400">Le destinataire a récupéré le colis avec succès.</p>
+                            <span id="stepDate5" class="text-[9px] text-slate-500 font-mono">--/--/----</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SERVICES SECTION -->
+        <section id="services" class="py-16 px-6 max-w-7xl mx-auto">
+            <h2 class="text-2xl md:text-3xl font-black text-white text-center mb-12 tracking-tight">
+                Comment fonctionne la logistique Rfacto ?
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-rfacto-cardDark p-6 rounded-2xl border border-rfacto-borderDark shadow-md">
+                    <div class="size-12 bg-rfacto-primary/20 text-rfacto-primary rounded-xl flex items-center justify-center text-xl mb-5 font-bold">
+                        1
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Déclaration en ligne</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">
+                        Créez votre compte, renseignez les dimensions, le poids et le contenu de votre marchandise. Recevez instantanément une estimation claire de votre tarif.
+                    </p>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-rfacto-cardDark p-6 rounded-2xl border border-rfacto-borderDark shadow-md">
+                    <div class="size-12 bg-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center text-xl mb-5 font-bold">
+                        2
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Dépôt au Dépôt Transit</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">
+                        Déposez votre colis ou faites-le livrer à notre adresse de transit à Laurier-station (Québec). Nos agents canadiens valident les dimensions et l'emballent de manière sécuritaire.
+                    </p>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-rfacto-cardDark p-6 rounded-2xl border border-rfacto-borderDark shadow-md">
+                    <div class="size-12 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-xl mb-5 font-bold">
+                        3
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Suivi & Retrait Local</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">
+                        Suivez le conteneur en haute mer ou le vol aérien étape par étape. Soyez notifié dès son arrivée au point relais de Libreville, Douala ou Abidjan pour retrait sécurisé.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ SECTION (ACCORDION) -->
+        <section id="faq" class="py-16 px-6 max-w-4xl mx-auto border-t border-rfacto-borderDark/40">
+            <!-- Section Header -->
+            <div class="text-center mb-12">
+                <span class="bg-rfacto-primary/10 text-rfacto-primary text-[10px] font-extrabold px-3 py-1 rounded-full border border-rfacto-primary/20 uppercase tracking-widest inline-block mb-3">
+                    Questions Fréquentes
+                </span>
+                <h2 class="text-3xl font-black text-white tracking-tight">Des réponses claires à vos questions</h2>
+                <p class="text-slate-400 text-xs mt-2 max-w-xl mx-auto">
+                    Tout ce que vous devez savoir sur la douane, nos délais et la préparation de vos colis pour expédier en toute sérénité.
+                </p>
+            </div>
+
+            <!-- Accordion List -->
+            <div class="space-y-4">
+                <!-- Q1: Customs -->
+                <details class="group bg-rfacto-cardDark rounded-2xl border border-rfacto-borderDark p-5 transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex justify-between items-center font-bold text-white text-sm cursor-pointer list-none select-none">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-passport text-rfacto-primary text-base"></i>
+                            Comment sont gérés les frais de douane ?
+                        </span>
+                        <span class="transition duration-300 group-open:rotate-180 text-rfacto-primary text-xs shrink-0">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </span>
+                    </summary>
+                    <div class="text-xs text-slate-400 mt-4 leading-relaxed border-t border-rfacto-borderDark/40 pt-4 space-y-2">
+                        <p>
+                            Chez Rfacto, la simplicité et la transparence sont nos priorités absolues. Nos tarifs d'expédition (15$ CAD/kg pour le transport maritime et 28$ CAD/kg pour le transport aérien) sont <strong>strictement tout inclus</strong>.
+                        </p>
+                        <p>
+                            Cela signifie que <strong>le dédouanement complet et l'intégralité des taxes d'importation sont pris en charge par nos équipes logistiques</strong>. Vous n'aurez absolument aucun centime de plus, ni frais administratif supplémentaire, à payer lors de la récupération de votre colis au point relais local.
+                        </p>
+                    </div>
+                </details>
+
+                <!-- Q2: Delivery Times -->
+                <details class="group bg-rfacto-cardDark rounded-2xl border border-rfacto-borderDark p-5 transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex justify-between items-center font-bold text-white text-sm cursor-pointer list-none select-none">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-calendar-days text-purple-400 text-base"></i>
+                            Quels sont les délais réels de livraison (Aérien & Maritime) ?
+                        </span>
+                        <span class="transition duration-300 group-open:rotate-180 text-purple-400 text-xs shrink-0">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </span>
+                    </summary>
+                    <div class="text-xs text-slate-400 mt-4 leading-relaxed border-t border-rfacto-borderDark/40 pt-4 space-y-2">
+                        <p>
+                            Les délais de livraison dépendent directement du mode de transport choisi :
+                        </p>
+                        <ul class="list-disc pl-5 space-y-1.5 mt-2">
+                            <li><strong>Transport Aérien (Cargo express)</strong> : Comptez seulement <strong>7 à 10 jours ouvrables</strong> après la réception physique de votre marchandise dans notre entrepôt au Canada.</li>
+                            <li><strong>Transport Maritime (Conteneur sécurisé)</strong> : Comptez environ <strong>4 à 6 semaines</strong> de transit à partir de la date de clôture et du départ du conteneur.</li>
+                        </ul>
+                        <p class="mt-2">
+                            Nous gérons des rotations et départs de manière extrêmement régulière afin de minimiser le temps de traitement et d'assurer une ponctualité exemplaire.
+                        </p>
+                    </div>
+                </details>
+
+                <!-- Q3: Packaging -->
+                <details class="group bg-rfacto-cardDark rounded-2xl border border-rfacto-borderDark p-5 transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex justify-between items-center font-bold text-white text-sm cursor-pointer list-none select-none">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-box-open text-emerald-400 text-base"></i>
+                            Quelles sont les consignes d'emballage pour mes marchandises ?
+                        </span>
+                        <span class="transition duration-300 group-open:rotate-180 text-emerald-400 text-xs shrink-0">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </span>
+                    </summary>
+                    <div class="text-xs text-slate-400 mt-4 leading-relaxed border-t border-rfacto-borderDark/40 pt-4 space-y-2">
+                        <p>
+                            Pour garantir l'intégrité de vos produits durant tout le transport international :
+                        </p>
+                        <ul class="list-disc pl-5 space-y-1.5 mt-2">
+                            <li>Les marchandises doivent être emballées dans des <strong>cartons solides et scellés</strong> avec du ruban adhésif robuste.</li>
+                            <li>Les objets fragiles (écrans, verres, électronique) doivent être protégés individuellement avec du <strong>papier bulle</strong> ou du calage en mousse.</li>
+                            <li>Si vous achetez en ligne et faites livrer directement chez nous, notre équipe canadienne peut inspecter, consolider ou renforcer vos paquets pour s'assurer qu'ils supportent le transit.</li>
+                        </ul>
+                        <p class="mt-2 text-rose-400 font-bold">
+                            * Note importante : Les aérosols sous pression, batteries de lithium non installées, armes, liquides hautement inflammables et autres matières dangereuses sont strictement interdites.
+                        </p>
+                    </div>
+                </details>
+
+                <!-- Q4: Tracking -->
+                <details class="group bg-rfacto-cardDark rounded-2xl border border-rfacto-borderDark p-5 transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex justify-between items-center font-bold text-white text-sm cursor-pointer list-none select-none">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-satellite-dish text-sky-400 text-base"></i>
+                            Comment puis-je suivre l'évolution de mon envoi ?
+                        </span>
+                        <span class="transition duration-300 group-open:rotate-180 text-sky-400 text-xs shrink-0">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </span>
+                    </summary>
+                    <div class="text-xs text-slate-400 mt-4 leading-relaxed border-t border-rfacto-borderDark/40 pt-4 space-y-2">
+                        <p>
+                            Le suivi en temps réel est au cœur de l'expérience Rfacto. Chaque fois qu'un colis est enregistré, un code de suivi unique (ex: <code>RF-XXXXX-CA</code>) lui est assigné.
+                        </p>
+                        <p>
+                            Vous pouvez suivre les étapes de transit en saisissant ce code dans l'outil de suivi en haut de cette page, ou en installant notre <strong>application mobile Android Rfacto</strong>. L'application mobile vous enverra des notifications Push instantanées à chaque étape clé (réception, départ maritime/aérien, arrivée locale et mise à disposition).
+                        </p>
+                    </div>
+                </details>
+
+                <!-- Q5: Support -->
+                <details class="group bg-rfacto-cardDark rounded-2xl border border-rfacto-borderDark p-5 transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex justify-between items-center font-bold text-white text-sm cursor-pointer list-none select-none">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-headset text-amber-400 text-base"></i>
+                            Que faire en cas de question ou si j'ai besoin d'assistance ?
+                        </span>
+                        <span class="transition duration-300 group-open:rotate-180 text-amber-400 text-xs shrink-0">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </span>
+                    </summary>
+                    <div class="text-xs text-slate-400 mt-4 leading-relaxed border-t border-rfacto-borderDark/40 pt-4 space-y-2">
+                        <p>
+                            Notre équipe support est à votre entière disposition pour vous guider. Vous pouvez :
+                        </p>
+                        <ul class="list-disc pl-5 space-y-1.5 mt-2">
+                            <li>Discuter instantanément par <strong>WhatsApp au +1 581 443 9464</strong>.</li>
+                            <li>Nous écrire un courriel professionnel à <strong>info@misterdil.ca</strong>.</li>
+                            <li>Consulter les adresses et informations détaillées de retrait de vos colis en bas de cette page.</li>
+                        </ul>
+                        <p class="mt-2">
+                            Nous nous engageons à répondre à toutes les demandes d'assistance en moins de 24 heures (du lundi au vendredi).
+                        </p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- APP DOWNLOAD & TRANSIT DETAILS SECTION -->
+        <section id="downloadApp" class="bg-slate-900 border-t border-b border-rfacto-borderDark py-16 px-6">
+            <div class="max-w-7xl mx-auto space-y-16">
+                
+                <!-- Section Header -->
+                <div class="text-center max-w-2xl mx-auto">
+                    <span class="bg-rfacto-primary/10 text-rfacto-primary text-[10px] font-extrabold px-3 py-1 rounded-full border border-rfacto-primary/20 uppercase tracking-widest inline-block mb-3">
+                        Application Mobile
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-black text-white tracking-tight">Rfacto est dans votre poche !</h2>
+                    <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                        Gérer toutes vos expéditions, suivre vos colis en temps réel et recevoir des notifications instantanées grâce à notre application mobile Android.
+                    </p>
+                </div>
+
+                <!-- App Features & Download Buttons Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <!-- Left: Features List -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <h3 class="text-xl font-extrabold text-white">Pourquoi utiliser l'application mobile ?</h3>
+                        
+                        <div class="space-y-4">
+                            <!-- Feature 1 -->
+                            <div class="flex gap-4 p-4 rounded-2xl bg-rfacto-cardDark/50 border border-rfacto-borderDark/60">
+                                <div class="size-10 bg-rfacto-primary/20 text-rfacto-primary rounded-xl flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-plus-circle text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Déclaration de colis simplifiée</h4>
+                                    <p class="text-slate-400 text-xs mt-1">Enregistrez vos nouveaux colis en indiquant le poids et le contenu pour obtenir immédiatement votre numéro de suivi unique.</p>
+                                </div>
+                            </div>
+
+                            <!-- Feature 2 -->
+                            <div class="flex gap-4 p-4 rounded-2xl bg-rfacto-cardDark/50 border border-rfacto-borderDark/60">
+                                <div class="size-10 bg-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-bell text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Notifications push en temps réel</h4>
+                                    <p class="text-slate-400 text-xs mt-1">Soyez alerté instantanément à chaque changement de statut de votre envoi (réception au Canada, départ du cargo, arrivée au point relais).</p>
+                                </div>
+                            </div>
+
+                            <!-- Feature 3 -->
+                            <div class="flex gap-4 p-4 rounded-2xl bg-rfacto-cardDark/50 border border-rfacto-borderDark/60">
+                                <div class="size-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-wallet text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Paiement et facturation transparents</h4>
+                                    <p class="text-slate-400 text-xs mt-1">Visualisez vos factures détaillées basées sur les tarifs réels et suivez l'historique de vos règlements.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Download Badges -->
+                    <div class="lg:col-span-5 bg-rfacto-cardDark p-8 rounded-3xl border border-rfacto-borderDark shadow-xl space-y-6 text-center">
+                        <div class="size-16 bg-rfacto-primary/15 text-rfacto-primary rounded-2xl flex items-center justify-center mx-auto text-3xl">
+                            <i class="fa-solid fa-download"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-white">Télécharger l'application</h4>
+                            <p class="text-slate-400 text-xs mt-1">Installez l'application Rfacto sur votre appareil mobile en un clic.</p>
+                        </div>
+
+                        <div class="flex flex-col gap-3 max-w-xs mx-auto">
+                            <!-- Direct APK Download Link -->
+                            <a href="#" onclick="alert('Téléchargement du fichier Rfacto.apk en cours... (Simulé pour cette démonstration)')" class="flex items-center justify-center gap-3 bg-rfacto-primary hover:bg-rfacto-primaryDark text-white px-5 py-3.5 rounded-xl font-bold text-xs shadow-lg shadow-rfacto-primary/20 transition-all">
+                                <i class="fa-brands fa-android text-xl"></i>
+                                <div class="text-left">
+                                    <span class="block text-[8px] font-bold text-slate-200 uppercase leading-none mb-1">Télécharger pour Android</span>
+                                    <span class="text-xs">Fichier APK (Direct)</span>
+                                </div>
+                            </a>
+
+                            <!-- Google Play -->
+                            <a href="#" onclick="alert('L’application Rfacto sera très prochainement disponible sur Google Play.')" class="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-slate-300 px-5 py-3.5 rounded-xl font-bold text-xs border border-slate-700 transition-all">
+                                <i class="fa-brands fa-google-play text-lg"></i>
+                                <div class="text-left">
+                                    <span class="block text-[8px] font-bold text-slate-400 uppercase leading-none mb-1">Disponible bientôt sur</span>
+                                    <span class="text-xs">Google Play Store</span>
+                                </div>
+                            </a>
+
+                            <!-- App Store -->
+                            <a href="#" onclick="alert('L’application Rfacto sera très prochainement disponible sur l’App Store.')" class="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-slate-300 px-5 py-3.5 rounded-xl font-bold text-xs border border-slate-700 transition-all">
+                                <i class="fa-brands fa-apple text-lg"></i>
+                                <div class="text-left">
+                                    <span class="block text-[8px] font-bold text-slate-400 uppercase leading-none mb-1">Disponible bientôt sur</span>
+                                    <span class="text-xs">Apple App Store</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transit Location & Support Details -->
+                <div class="bg-rfacto-cardDark p-8 rounded-3xl border border-rfacto-borderDark shadow-xl grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Left: Transit Address Card -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-warehouse"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white">Adresse de transit au Canada</h3>
+                        </div>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            Faites livrer vos achats en ligne ou déposez directement vos marchandises à notre terminal logistique canadien :
+                        </p>
+                        <div class="p-4 rounded-xl bg-slate-900 border border-rfacto-borderDark font-mono text-xs text-slate-300 space-y-1 font-semibold">
+                            <p class="font-bold text-white">Rfacto Transit</p>
+                            <p>127 rue Talbot</p>
+                            <p>Laurier-station, Québec</p>
+                            <p>Canada</p>
+                        </div>
+                        <p class="text-[10px] text-slate-500">
+                            * Attention : Assurez-vous d’indiquer votre nom et numéro de suivi Rfacto lors de la livraison à notre adresse.
+                        </p>
+                    </div>
+
+                    <!-- Right: Support & Customer Care -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-headset"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white">Service client & Support</h3>
+                        </div>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            Une question sur un envoi ou sur nos tarifs ? Notre équipe est à votre disposition pour vous répondre sous 24 heures :
+                        </p>
+                        <div class="space-y-3">
+                            <!-- WhatsApp contact -->
+                            <a href="https://wa.me/15814439464" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-rfacto-borderDark/80 hover:border-rfacto-primary/40 transition-all group">
+                                <div class="size-8 rounded-lg bg-[#25D366]/10 text-[#25D366] flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold leading-none">WhatsApp support direct</p>
+                                    <p class="text-xs text-slate-200 font-bold group-hover:text-rfacto-primary transition-colors">+1 581 443 9464</p>
+                                </div>
+                            </a>
+
+                            <!-- Email contact -->
+                            <a href="mailto:info@misterdil.ca" class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-rfacto-borderDark/80 hover:border-rfacto-primary/40 transition-all group">
+                                <div class="size-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold leading-none">Email professionnel</p>
+                                    <p class="text-xs text-slate-200 font-bold group-hover:text-rfacto-primary transition-colors font-semibold">info@misterdil.ca</p>
+                                </div>
+                            </a>
+                        </div>
+                        <p class="text-[10px] text-slate-500">
+                            Disponibilité : Du lundi au vendredi.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CALCULATEUR SECTION -->
+        <section id="tarifs" class="py-16 px-6 max-w-4xl mx-auto text-center">
+            <h2 class="text-2xl md:text-3xl font-black text-white mb-4 tracking-tight">Estimez vos frais d'envoi en 1 clic</h2>
+            <p class="text-xs text-slate-400 max-w-lg mx-auto mb-10">
+                Entrez simplement le poids estimé de vos cartons ou marchandises pour obtenir le coût exact selon le canal de transport choisi.
+            </p>
+
+            <div class="bg-rfacto-cardDark p-8 rounded-3xl border border-rfacto-borderDark shadow-xl grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-slate-400">Outil de Simulation</h4>
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="block text-slate-300 font-bold mb-1.5">Poids estimé de la marchandise (en kg)</label>
+                            <input type="number" id="calcWeight" value="10" oninput="runStandaloneCalc()" class="w-full bg-rfacto-slateDark border border-rfacto-borderDark rounded-xl p-3 text-white text-sm font-black focus:border-rfacto-primary focus:outline-none font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 font-bold mb-1.5">Mode de Transport Recommandé</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="setCalcMode('Maritime')" id="btnModeMaritime" class="py-3 px-4 rounded-xl border border-rfacto-primary bg-rfacto-primary/10 text-white font-extrabold text-center text-xs transition-all">
+                                    <i class="fa-solid fa-ship mb-1 block text-lg"></i>
+                                    <span>Maritime</span>
+                                </button>
+                                <button onclick="setCalcMode('Aérien')" id="btnModeAerien" class="py-3 px-4 rounded-xl border border-rfacto-borderDark bg-transparent text-slate-400 font-bold text-center text-xs transition-all">
+                                    <i class="fa-solid fa-plane mb-1 block text-lg"></i>
+                                    <span>Aérien</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-rfacto-secondary/40 p-6 rounded-2xl border border-rfacto-borderDark flex flex-col justify-between">
+                    <div>
+                        <h5 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Synthèse de Calcul</h5>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between text-slate-300">
+                                <span>Poids simulé :</span>
+                                <strong id="summaryWeight" class="font-mono">10 kg</strong>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Canal logistique :</span>
+                                <strong id="summaryMode">Maritime (Fret)</strong>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Frais d'agence :</span>
+                                <strong class="text-emerald-400">0.00 CAD</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-rfacto-borderDark/80 flex justify-between items-center">
+                        <div>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Tarif Estimé Net</span>
+                            <span class="text-[9px] text-slate-500">Hors douane selon gabarit</span>
+                        </div>
+                        <span id="standaloneResultText" class="text-3xl font-black text-rfacto-accent font-mono">150.00 CAD</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-rfacto-secondary border-t border-rfacto-borderDark py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-3">
+                <div class="size-8 bg-rfacto-primary text-white font-extrabold flex items-center justify-center rounded-lg shadow-md">
+                    <span>R</span>
+                </div>
+                <div>
+                    <h4 class="text-sm font-black text-white leading-none">Rfacto</h4>
+                    <span class="text-[8px] font-bold tracking-[2px] text-slate-400">LOGISTIQUE CANADA</span>
+                </div>
+            </div>
+            
+            <div class="text-xs text-slate-400 text-center md:text-right">
+                <p>&copy; 2026 Rfacto Logistique Canada. Tous droits réservés.</p>
+                <p class="mt-1 text-[10px] text-slate-500">
+                    Développé en harmonie avec l'application mobile Android Rfacto.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE JAVASCRIPT LOGIC -->
+    <script>
+        // Core in-memory database of parcels simulating the Android local SQLite database
+        let parcels = [
+            {
+                code: "RF-99824-CA",
+                owner: "Jean Dupont",
+                content: "Laptop Asus ROG & Vêtements d'hiver",
+                status: "Livré",
+                weight: 4.5,
+                cost: 67.50,
+                mode: "Maritime",
+                destination: "Libreville (Gabon)",
+                dates: {
+                    declared: "2026-06-15",
+                    transit: "2026-06-18",
+                    shipped: "2026-06-21",
+                    arrived: "2026-07-02",
+                    delivered: "2026-07-05"
+                }
+            },
+            {
+                code: "RF-44512-CA",
+                owner: "Jean Dupont",
+                content: "Téléphone Samsung Galaxy S23 & Chaussures",
+                status: "En Transit (En mer)",
+                weight: 1.2,
+                cost: 18.00,
+                mode: "Maritime",
+                destination: "Paris (France)",
+                dates: {
+                    declared: "2026-06-25",
+                    transit: "2026-06-28",
+                    shipped: "2026-07-01",
+                    arrived: null,
+                    delivered: null
+                }
+            },
+            {
+                code: "RF-11231-CA",
+                owner: "Marie Mba",
+                content: "Produits de cosmétiques & Pièces Auto reconditionnées",
+                status: "Reçu au Transit Canada",
+                weight: 12.0,
+                cost: 336.00,
+                mode: "Aérien",
+                destination: "Libreville (Gabon)",
+                dates: {
+                    declared: "2026-07-01",
+                    transit: "2026-07-04",
+                    shipped: null,
+                    arrived: null,
+                    delivered: null
+                }
+            },
+            {
+                code: "RF-22871-CA",
+                owner: "Jean Dupont",
+                content: "Livres scolaires & Ustensiles de Cuisine",
+                status: "Prêt au point relais (Libreville)",
+                weight: 3.0,
+                cost: 45.00,
+                mode: "Maritime",
+                destination: "Libreville (Gabon)",
+                dates: {
+                    declared: "2026-06-20",
+                    transit: "2026-06-23",
+                    shipped: "2026-06-26",
+                    arrived: "2026-07-06",
+                    delivered: null
+                }
+            }
+        ];
+
+        let standaloneSelectedMode = "Maritime";
+
+        // Initialize App UI
+        document.addEventListener('DOMContentLoaded', () => {
+            runStandaloneCalc();
+        });
+
+
+        // --- STANDALONE SIMULATION CALCULATOR ---
+        function setCalcMode(mode) {
+            standaloneSelectedMode = mode;
+            
+            const btnMaritime = document.getElementById('btnModeMaritime');
+            const btnAerien = document.getElementById('btnModeAerien');
+
+            if (mode === 'Maritime') {
+                btnMaritime.className = "py-3 px-4 rounded-xl border border-rfacto-primary bg-rfacto-primary/10 text-white font-extrabold text-center text-xs transition-all";
+                btnAerien.className = "py-3 px-4 rounded-xl border border-rfacto-borderDark bg-transparent text-slate-400 font-bold text-center text-xs transition-all";
+            } else {
+                btnAerien.className = "py-3 px-4 rounded-xl border border-rfacto-primary bg-rfacto-primary/10 text-white font-extrabold text-center text-xs transition-all";
+                btnMaritime.className = "py-3 px-4 rounded-xl border border-rfacto-borderDark bg-transparent text-slate-400 font-bold text-center text-xs transition-all";
+            }
+
+            runStandaloneCalc();
+        }
+
+        function runStandaloneCalc() {
+            const weightInput = document.getElementById('calcWeight').value;
+            let weight = parseFloat(weightInput) || 0;
+            let rate = standaloneSelectedMode === 'Maritime' ? 15 : 28;
+            
+            let cost = weight * rate;
+            if (cost < 10 && weight > 0) cost = 10;
+
+            document.getElementById('summaryWeight').innerText = `${weight} kg`;
+            document.getElementById('summaryMode').innerText = `${standaloneSelectedMode} (${rate} CAD / kg)`;
+            document.getElementById('standaloneResultText').innerText = `${cost.toFixed(2)} CAD`;
+        }
+
+
+        // --- PUBLIC PORTAL TRACK & TRACE UTILS ---
+        function fillAndTrack(code) {
+            document.getElementById('publicTrackingInput').value = code;
+            trackPublicParcel();
+            
+            // Smooth scroll to tracking section
+            document.getElementById('trackingSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function trackPublicParcel() {
+            const trackingCode = document.getElementById('publicTrackingInput').value.trim();
+            const p = parcels.find(p => p.code.toLowerCase() === trackingCode.toLowerCase());
+
+            const resultArea = document.getElementById('trackingResultArea');
+
+            if (!p) {
+                resultArea.classList.remove('hidden');
+                document.getElementById('trackResultCode').innerText = "Inconnu";
+                document.getElementById('trackResultBadge').innerText = "Erreur";
+                document.getElementById('trackResultBadge').className = "px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30";
+                
+                document.getElementById('trackResultContent').innerText = "Aucun colis trouvé";
+                document.getElementById('trackResultWeight').innerText = "N/A";
+                document.getElementById('trackResultDest').innerText = "N/A";
+                document.getElementById('trackResultMode').innerText = "N/A";
+
+                // Gray out all dots
+                resetTimelineDots();
+                return;
+            }
+
+            // Render details
+            resultArea.classList.remove('hidden');
+            document.getElementById('trackResultCode').innerText = p.code;
+            document.getElementById('trackResultContent').innerText = p.content;
+            document.getElementById('trackResultWeight').innerText = `${p.weight} kg`;
+            document.getElementById('trackResultDest').innerText = p.destination;
+            document.getElementById('trackResultMode').innerText = p.mode;
+
+            // Compute active step based on status
+            let stepLevel = 1;
+            if (p.status === 'Colis Déclaré') {
+                stepLevel = 1;
+            } else if (p.status === 'Reçu au Transit Canada') {
+                stepLevel = 2;
+            } else if (p.status.includes('Transit') || p.status.includes('Transit')) {
+                stepLevel = 3;
+            } else if (p.status.includes('Relais')) {
+                stepLevel = 4;
+            } else if (p.status === 'Livré') {
+                stepLevel = 5;
+            }
+
+            // Set badge status
+            let badgeClass = "bg-slate-700 text-slate-300";
+            if (p.status === 'Colis Déclaré') badgeClass = "bg-rfacto-primary/20 text-rfacto-primary border border-rfacto-primary/40";
+            else if (p.status.includes('Transit') || p.status.includes('Transit')) badgeClass = "bg-purple-500/20 text-purple-400 border border-purple-500/40";
+            else if (p.status.includes('Relais')) badgeClass = "bg-amber-500/20 text-amber-400 border border-amber-500/40";
+            else if (p.status === 'Livré') badgeClass = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+
+            const badge = document.getElementById('trackResultBadge');
+            badge.innerText = p.status;
+            badge.className = `px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wide ${badgeClass}`;
+
+            // Render dates and update circles
+            const dates = [
+                p.dates.declared,
+                p.dates.transit,
+                p.dates.shipped,
+                p.dates.arrived,
+                p.dates.delivered
+            ];
+
+            for (let i = 1; i <= 5; i++) {
+                const dot = document.getElementById(`stepDot${i}`);
+                const dateSpan = document.getElementById(`stepDate${i}`);
+
+                // Render Dates cleanly or '--/--/----'
+                if (dates[i - 1]) {
+                    const originalDate = new Date(dates[i - 1]);
+                    dateSpan.innerText = originalDate.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                } else {
+                    dateSpan.innerText = "En attente";
+                }
+
+                if (i <= stepLevel) {
+                    if (stepLevel === 5) {
+                        dot.className = "size-6 rounded-full bg-emerald-500 border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-slate-950 font-black z-10";
+                    } else if (i === stepLevel) {
+                        dot.className = "size-6 rounded-full bg-amber-500 border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-slate-950 font-black z-10 animate-pulse";
+                    } else {
+                        dot.className = "size-6 rounded-full bg-rfacto-primary border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-white font-bold z-10";
+                    }
+                } else {
+                    dot.className = "size-6 rounded-full bg-slate-800 border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-slate-500 z-10 font-bold";
+                }
+            }
+        }
+
+        function resetTimelineDots() {
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`stepDot${i}`).className = "size-6 rounded-full bg-slate-800 border-4 border-rfacto-cardDark flex items-center justify-center text-[10px] text-slate-500 z-10 font-bold";
+                document.getElementById(`stepDate${i}`).innerText = "--/--/----";
+            }
+        }
+
+        function scrollToPortail() {
+            document.getElementById('portail').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
