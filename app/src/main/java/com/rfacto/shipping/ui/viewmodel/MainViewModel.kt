@@ -385,19 +385,27 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
         val weight = declPoidsEst.value.toDoubleOrNull() ?: 0.0
         val pays = declPaysDest.value
         val mode = declModeLivraison.value
+        val valDecl = declValeur.value.toDoubleOrNull() ?: 0.0
 
         viewModelScope.launch {
-            // Get rates from repository (Room now, but seeds are real data)
+            // Get rates from repository
             val rates = repository.getTarifByPays(pays)
             val prKg = rates?.prixParKg ?: 15.0
             val livLoc = rates?.livraisonLocale ?: 8.0
             val currentAssuranceBase = rates?.assurance ?: 5.0
             
-            // Logic: Base price by weight + delivery + small insurance if value is high
+            // Logic: Base price by weight + delivery
             val base = weight * prKg
             val deliveryExtra = if (mode == "LIVRAISON_DOMICILE") livLoc else 0.0
-            val valDecl = declValeur.value.toDoubleOrNull() ?: 0.0
-            val insuranceExtra = if (valDecl > 200.0) currentAssuranceBase else 0.0
+            
+            // Insurance logic: 5$ base if > 200$ + 1% of value if > 1000$
+            var insuranceExtra = 0.0
+            if (valDecl > 200.0) {
+                insuranceExtra = currentAssuranceBase
+                if (valDecl > 1000.0) {
+                    insuranceExtra += (valDecl * 0.01) // 1% extra insurance for high value
+                }
+            }
             
             declEstimatedPrice.value = base + deliveryExtra + insuranceExtra
             _navigationRoute.value = "declaration_payment"
@@ -413,10 +421,12 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             try {
                 // We create a temporary parcel ID or use -1 if the backend supports it
                 // To be clean, the backend usually expects the final amount.
+                val client = _currentUser.value ?: return@launch
                 val response = RFactoApi.getInstance().createPaymentIntent(
                     CreatePaymentIntentRequest(
                         parcelId = 0, // In this flow, parcel is created AFTER payment success
-                        amountCad = declEstimatedPrice.value
+                        amountCad = declEstimatedPrice.value,
+                        userId = client.id
                     )
                 )
                 
@@ -813,12 +823,19 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
         viewModelScope.launch {
             stripeLoading.value = true
             stripeError.value = null
+            val client = _currentUser.value
+            if (client == null) {
+                stripeError.value = "Utilisateur non connecté."
+                onResult(null)
+                return@launch
+            }
             try {
                 val api = com.rfacto.shipping.data.api.RFactoApi.getInstance()
                 val response = api.createPaymentIntent(
                     com.rfacto.shipping.data.api.CreatePaymentIntentRequest(
                         parcelId = parcelId,
-                        amountCad = amountCad
+                        amountCad = amountCad,
+                        userId = client.id
                     )
                 )
                 if (response.isSuccessful && response.body() != null) {

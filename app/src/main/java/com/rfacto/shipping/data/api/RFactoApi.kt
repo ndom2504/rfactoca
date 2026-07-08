@@ -8,6 +8,7 @@ import retrofit2.http.POST
 import retrofit2.http.GET
 import retrofit2.http.Query
 import com.rfacto.shipping.BuildConfig
+import com.squareup.moshi.JsonClass
 
 interface RFactoApi {
 
@@ -61,12 +62,14 @@ interface RFactoApi {
     }
 }
 
+@JsonClass(generateAdapter = true)
 data class GoogleSignInRequest(
     val email: String,
     val fullName: String,
     val idToken: String
 )
 
+@JsonClass(generateAdapter = true)
 data class AuthResponse(
     val status: String,
     val token: String,
@@ -75,12 +78,15 @@ data class AuthResponse(
     val email: String
 )
 
+@JsonClass(generateAdapter = true)
 data class CreatePaymentIntentRequest(
     val parcelId: Int,
     val amountCad: Double,
+    val userId: Int,
     val currency: String = "CAD"
 )
 
+@JsonClass(generateAdapter = true)
 data class PaymentIntentResponse(
     val paymentIntentClientSecret: String,
     val ephemeralKeySecret: String,
@@ -88,11 +94,13 @@ data class PaymentIntentResponse(
     val publishableKey: String
 )
 
+@JsonClass(generateAdapter = true)
 data class UploadUrlResponse(
     val uploadUrl: String,
     val publicUrl: String
 )
 
+@JsonClass(generateAdapter = true)
 data class UpdateProfileRequest(
     val userId: Int,
     val nom: String,
@@ -103,6 +111,7 @@ data class UpdateProfileRequest(
     val adresse: String
 )
 
+@JsonClass(generateAdapter = true)
 data class StatusResponse(
     val status: String,
     val message: String
