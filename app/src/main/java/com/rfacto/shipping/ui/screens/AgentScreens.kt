@@ -1,11 +1,15 @@
 package com.rfacto.shipping.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -17,11 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.rfacto.shipping.data.model.Colis
 import com.rfacto.shipping.ui.theme.*
 import com.rfacto.shipping.ui.viewmodel.MainViewModel
@@ -37,6 +43,16 @@ fun AgentCanadaView(viewModel: MainViewModel) {
     val pReel by viewModel.agentPoidsReel.collectAsState()
     val dReelles by viewModel.agentDimReelles.collectAsState()
     val etat by viewModel.agentEtatColis.collectAsState()
+    val agentPhoto by viewModel.agentPhoto.collectAsState()
+    val isPaymentLoading by viewModel.isPaymentLoading.collectAsState()
+
+    val photoLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            viewModel.agentPhoto.value = uri.toString()
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -187,6 +203,31 @@ fun AgentCanadaView(viewModel: MainViewModel) {
 
                         Text("Mesures réelles et inspection", fontWeight = FontWeight.Bold, fontSize = 14.sp)
 
+                        // Photo capture/upload
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                .clickable { photoLauncher.launch("image/*") },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (agentPhoto.startsWith("content://")) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(agentPhoto),
+                                    contentDescription = "Photo inspection",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(Icons.Default.AddAPhoto, contentDescription = null, tint = RFactoPrimary)
+                                    Text("Prendre une photo du colis", fontSize = 12.sp)
+                                }
+                            }
+                        }
+
                         OutlinedTextField(
                             value = pReel,
                             onValueChange = { viewModel.agentPoidsReel.value = it },
@@ -245,6 +286,11 @@ fun AgentCanadaView(viewModel: MainViewModel) {
 
                         Spacer(modifier = Modifier.height(8.dp))
 
+                        if (isPaymentLoading) {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
                         Button(
                             onClick = {
                                 selectedColisToReceive?.let { colis ->
@@ -256,7 +302,8 @@ fun AgentCanadaView(viewModel: MainViewModel) {
                                 .fillMaxWidth()
                                 .height(48.dp)
                                 .testTag("agent_receive_submit"),
-                            colors = ButtonDefaults.buttonColors(containerColor = StatusDelivered)
+                            colors = ButtonDefaults.buttonColors(containerColor = StatusDelivered),
+                            enabled = !isPaymentLoading
                         ) {
                             Icon(Icons.Default.Check, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))

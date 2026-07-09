@@ -480,7 +480,6 @@ fun ProfileView(viewModel: MainViewModel) {
     val error by viewModel.profileError.collectAsState()
     val success by viewModel.profileSuccess.collectAsState()
 
-    val coroutineScope = rememberCoroutineScope()
     var isUploading by remember { mutableStateOf(false) }
     var uploadProgress by remember { mutableFloatStateOf(0f) }
 
@@ -488,17 +487,7 @@ fun ProfileView(viewModel: MainViewModel) {
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
-            // Simulated interactive upload with progress
-            coroutineScope.launch {
-                isUploading = true
-                uploadProgress = 0f
-                while (uploadProgress < 1.0f) {
-                    kotlinx.coroutines.delay(100)
-                    uploadProgress += 0.1f
-                }
-                viewModel.uploadAndSetProfilePhoto(uri.toString())
-                isUploading = false
-            }
+            viewModel.uploadAndSetProfilePhoto(uri.toString())
         }
     }
 
@@ -592,20 +581,7 @@ fun ProfileView(viewModel: MainViewModel) {
 
                     Button(
                         onClick = {
-                            isUploading = true
-                            uploadProgress = 0f
-                            coroutineScope.launch {
-                                while (uploadProgress < 1f) {
-                                    delay(150)
-                                    uploadProgress += 0.15f
-                                }
-                                uploadProgress = 1f
-                                delay(300)
-                                isUploading = false
-                                val randomPreset = listOf("preset_1", "preset_2", "preset_3", "preset_4").random()
-                                viewModel.updateProfilePhoto(randomPreset)
-                                viewModel.addNotification("Photo de profil téléversée avec succès sur le serveur Rfacto Cloud !")
-                            }
+                            viewModel.uploadAndSetProfilePhoto(currentPhoto ?: "")
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = RFactoPrimary),
                         shape = RoundedCornerShape(8.dp),

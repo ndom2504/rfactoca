@@ -51,6 +51,7 @@ fun DeclareColisView(viewModel: MainViewModel) {
     val modeLivraison by viewModel.declModeLivraison.collectAsState()
     val photoUri by viewModel.declPhotoUri.collectAsState()
     val error by viewModel.declError.collectAsState()
+    val isPaymentLoading by viewModel.isPaymentLoading.collectAsState()
 
     var dropdownCountryExpanded by remember { mutableStateOf(false) }
     val countries = listOf("Canada", "Gabon", "France")
@@ -337,6 +338,11 @@ fun DeclareColisView(viewModel: MainViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            if (isPaymentLoading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             Button(
                 onClick = { viewModel.estimateParcelFees() },
                 modifier = Modifier
@@ -344,7 +350,8 @@ fun DeclareColisView(viewModel: MainViewModel) {
                     .height(52.dp)
                     .testTag("decl_submit_button"),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = RFactoPrimary)
+                colors = ButtonDefaults.buttonColors(containerColor = RFactoPrimary),
+                enabled = !isPaymentLoading
             ) {
                 Text("Voir l'estimation et payer", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }

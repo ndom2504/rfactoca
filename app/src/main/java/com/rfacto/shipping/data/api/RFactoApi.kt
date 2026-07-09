@@ -9,6 +9,8 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import com.rfacto.shipping.BuildConfig
 import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 interface RFactoApi {
 
@@ -35,16 +37,36 @@ interface RFactoApi {
         @Body request: UpdateProfileRequest
     ): Response<StatusResponse>
 
-    @POST("api/colis/upload-url")
+    @GET("api/colis/upload-url")
     suspend fun getColisUploadUrl(
-        @Query("fileName") fileName: String
+        @Query("fileName") fileName: String,
+        @Query("fileType") fileType: String
     ): Response<UploadUrlResponse>
+
+    @POST("api/colis/create")
+    suspend fun createColis(
+        @Body request: CreateColisRequest
+    ): Response<StatusResponse>
+
+    @POST("api/colis/update-status")
+    suspend fun updateColisStatus(
+        @Body request: UpdateColisStatusRequest
+    ): Response<StatusResponse>
+
+    @POST("api/colis/sync-payment")
+    suspend fun syncPayment(
+        @Body request: SyncPaymentRequest
+    ): Response<StatusResponse>
 
     companion object {
         private var instance: RFactoApi? = null
 
         fun getInstance(): RFactoApi {
             if (instance == null) {
+                val moshi = Moshi.Builder()
+                    .addLast(KotlinJsonAdapterFactory())
+                    .build()
+
                 val baseUrl = if (BuildConfig.REMOTE_API_URL.endsWith("/")) {
                     BuildConfig.REMOTE_API_URL
                 } else {
@@ -53,7 +75,7 @@ interface RFactoApi {
                 
                 val retrofit = Retrofit.Builder()
                     .baseUrl(baseUrl)
-                    .addConverterFactory(MoshiConverterFactory.create())
+                    .addConverterFactory(MoshiConverterFactory.create(moshi))
                     .build()
                 instance = retrofit.create(RFactoApi::class.java)
             }
@@ -115,4 +137,40 @@ data class UpdateProfileRequest(
 data class StatusResponse(
     val status: String,
     val message: String
+)
+
+@JsonClass(generateAdapter = true)
+data class CreateColisRequest(
+    val numero: String,
+    val clientId: Int,
+    val clientName: String,
+    val description: String,
+    val poids: Double,
+    val dimensions: String,
+    val valeur: Double,
+    val photo: String?,
+    val paysDestination: String,
+    val ville: String,
+    val adresseDestination: String,
+    val modeLivraison: String,
+    val statut: String
+)
+
+@JsonClass(generateAdapter = true)
+data class UpdateColisStatusRequest(
+    val colisId: Int,
+    val statut: String,
+    val lieu: String,
+    val commentaire: String,
+    val poids: Double? = null,
+    val dimensions: String? = null,
+    val photo: String? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class SyncPaymentRequest(
+    val colisId: Int,
+    val montant: Double,
+    val mode: String,
+    val statut: String
 )

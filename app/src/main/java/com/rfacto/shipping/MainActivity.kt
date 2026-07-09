@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
             database.agentDao(),
             database.tarifsDao()
         )
-        val viewModel = MainViewModel(repository)
+        val viewModel = MainViewModel(repository, applicationContext.contentResolver)
 
         setContent {
             MyApplicationTheme {

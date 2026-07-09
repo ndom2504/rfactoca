@@ -1,5 +1,7 @@
 package com.rfacto.shipping.ui.viewmodel
 
+import android.content.ContentResolver
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfacto.shipping.data.api.CreatePaymentIntentRequest
@@ -7,11 +9,17 @@ import com.rfacto.shipping.data.api.PaymentIntentResponse
 import com.rfacto.shipping.data.api.RFactoApi
 import com.rfacto.shipping.data.model.*
 import com.rfacto.shipping.data.repository.AppRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.Random
 
-class MainViewModel(private val repository: AppRepository) : ViewModel() {
+class MainViewModel(private val repository: AppRepository, private val contentResolver: ContentResolver? = null) : ViewModel() {
 
     // Active User & Role
     private val _currentUser = MutableStateFlow<User?>(null)
@@ -475,12 +483,23 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
         }
 
         val client = _currentUser.value ?: return
+        isPaymentLoading.value = true
 
         // Generate tracking ID
         val randomSuffix = (100000..999999).random()
         val trackingNo = "RFC-2026-$randomSuffix"
 
         viewModelScope.launch {
+            var finalPhotoUrl = declPhotoUri.value
+            
+            // Upload photo to cloud if it's a local URI
+            if (finalPhotoUrl != null && finalPhotoUrl.startsWith("content://")) {
+                val uploadedUrl = uploadParcelPhoto(finalPhotoUrl)
+                if (uploadedUrl != null) {
+                    finalPhotoUrl = uploadedUrl
+                }
+            }
+
             val colis = Colis(
                 numero = trackingNo,
                 clientId = client.id,
@@ -489,7 +508,7 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
                 poids = weight,
                 dimensions = declDim.value,
                 valeur = valDecl,
-                photo = declPhotoUri.value,
+                photo = finalPhotoUrl,
                 paysDestination = declPaysDest.value,
                 ville = declVille.value,
                 adresseDestination = declAdresse.value,
@@ -501,6 +520,28 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             newlyCreatedColis.value = savedColis
             _selectedColis.value = savedColis
 
+            // Sync with backend: Remote Parcel Creation
+            try {
+                val api = RFactoApi.getInstance()
+                api.createColis(com.rfacto.shipping.data.api.CreateColisRequest(
+                    numero = trackingNo,
+                    clientId = client.id,
+                    clientName = "${client.prenom} ${client.nom}",
+                    description = "$nom - $desc",
+                    poids = weight,
+                    dimensions = declDim.value,
+                    valeur = valDecl,
+                    photo = finalPhotoUrl,
+                    paysDestination = declPaysDest.value,
+                    ville = declVille.value,
+                    adresseDestination = declAdresse.value,
+                    modeLivraison = declModeLivraison.value,
+                    statut = "PAIEMENT_VALIDE"
+                ))
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Remote parcel creation failed: ${e.message}")
+            }
+
             // Insert payment record
             repository.insertPaiement(Paiement(
                 colisId = id.toInt(),
@@ -509,6 +550,18 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
                 mode = modePaiement,
                 statut = "PAID"
             ))
+
+            // Sync payment with backend
+            try {
+                RFactoApi.getInstance().syncPayment(com.rfacto.shipping.data.api.SyncPaymentRequest(
+                    colisId = id.toInt(),
+                    montant = declEstimatedPrice.value,
+                    mode = modePaiement,
+                    statut = "PAID"
+                ))
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Remote payment sync failed: ${e.message}")
+            }
 
             // Insert initial tracking log
             repository.insertSuivi(Suivi(
@@ -519,6 +572,7 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             ))
 
             addNotification("Nouveau colis payé et déclaré : $trackingNo.")
+            isPaymentLoading.value = false
             _navigationRoute.value = "declaration_success"
 
             // Reset declaration fields
@@ -554,6 +608,19 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
                 val lossAmount = totalPaid * 0.2
                 
                 repository.updateColis(colis.copy(statut = "ANNULE"))
+                
+                // Sync cancellation with backend
+                try {
+                    RFactoApi.getInstance().updateColisStatus(com.rfacto.shipping.data.api.UpdateColisStatusRequest(
+                        colisId = colis.id,
+                        statut = "ANNULE",
+                        lieu = "Système RFacto",
+                        commentaire = "Annulation par le client. Remboursement de $refundAmount $ (Pénalité 20%: $lossAmount $)."
+                    ))
+                } catch (e: Exception) {
+                    android.util.Log.e("MainViewModel", "Remote cancellation sync failed: ${e.message}")
+                }
+
                 addNotification("Colis ${colis.numero} annulé. Remboursement de $refundAmount $ effectué (Pénalité de 20% : $lossAmount $)")
                 
                 repository.insertSuivi(Suivi(
@@ -589,15 +656,40 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             return
         }
 
+        isPaymentLoading.value = true
         viewModelScope.launch {
             val colis = repository.getColisById(colisId) ?: return@launch
+
+            var finalPhotoUrl = photo
+            if (photo.startsWith("content://")) {
+                val uploadedUrl = uploadParcelPhoto(photo)
+                if (uploadedUrl != null) {
+                    finalPhotoUrl = uploadedUrl
+                }
+            }
+
             val updatedColis = colis.copy(
                 poids = pReal,
                 dimensions = dims,
-                photo = photo,
+                photo = finalPhotoUrl,
                 statut = "RECU_CANADA"
             )
             repository.updateColis(updatedColis)
+
+            // Sync status update with backend
+            try {
+                RFactoApi.getInstance().updateColisStatus(com.rfacto.shipping.data.api.UpdateColisStatusRequest(
+                    colisId = colisId,
+                    statut = "RECU_CANADA",
+                    lieu = "Transit Montréal, Canada",
+                    commentaire = "Colis réceptionné et inspecté par l'agent. Poids réel: $pReal kg, Dimensions: $dims. État: $etat.",
+                    poids = pReal,
+                    dimensions = dims,
+                    photo = finalPhotoUrl
+                ))
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Remote status update failed: ${e.message}")
+            }
 
             // Add payment entry based on calculations
             val rates = repository.getTarifByPays(colis.paysDestination)
@@ -614,6 +706,18 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
                 statut = "PENDING"
             ))
 
+            // Sync payment entry with backend
+            try {
+                RFactoApi.getInstance().syncPayment(com.rfacto.shipping.data.api.SyncPaymentRequest(
+                    colisId = colisId,
+                    montant = totalFee,
+                    mode = "MOBILE_MONEY",
+                    statut = "PENDING"
+                ))
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Remote payment sync failed: ${e.message}")
+            }
+
             // Add suivi tracking item
             repository.insertSuivi(Suivi(
                 colisId = colis.id,
@@ -623,6 +727,7 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             ))
 
             addNotification("Agent Canada: Colis ${colis.numero} réceptionné avec succès. Frais d'expédition calculés : $totalFee $.")
+            isPaymentLoading.value = false
             _selectedColis.value = updatedColis
             _navigationRoute.value = "colis_detail"
         }
@@ -635,17 +740,55 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             val updatedColis = colis.copy(statut = "PAIEMENT_VALIDE")
             repository.updateColis(updatedColis)
 
+            // Sync status update with backend
+            try {
+                RFactoApi.getInstance().updateColisStatus(com.rfacto.shipping.data.api.UpdateColisStatusRequest(
+                    colisId = colisId,
+                    statut = "PAIEMENT_VALIDE",
+                    lieu = "En ligne",
+                    commentaire = "Paiement validé avec succès via $modePaiement."
+                ))
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Remote status update failed: ${e.message}")
+            }
+
             // Update payment history
             val paiements = repository.getPaiementsForColis(colisId).first()
             if (paiements.isNotEmpty()) {
                 val p = paiements.first()
-                repository.updatePaiement(p.copy(statut = "PAID", mode = modePaiement))
+                val updatedP = p.copy(statut = "PAID", mode = modePaiement)
+                repository.updatePaiement(updatedP)
+                
+                // Sync updated payment with backend
+                try {
+                    RFactoApi.getInstance().syncPayment(com.rfacto.shipping.data.api.SyncPaymentRequest(
+                        colisId = colisId,
+                        montant = updatedP.montant,
+                        mode = modePaiement,
+                        statut = "PAID"
+                    ))
+                } catch (e: Exception) {
+                    android.util.Log.e("MainViewModel", "Remote payment sync failed: ${e.message}")
+                }
             } else {
                 // If somehow empty, create paid record
-                repository.insertPaiement(Paiement(
+                val newP = Paiement(
                     colisId = colisId, colisNumero = colis.numero,
                     montant = 48.0, mode = modePaiement, statut = "PAID"
-                ))
+                )
+                repository.insertPaiement(newP)
+
+                // Sync new payment with backend
+                try {
+                    RFactoApi.getInstance().syncPayment(com.rfacto.shipping.data.api.SyncPaymentRequest(
+                        colisId = colisId,
+                        montant = newP.montant,
+                        mode = modePaiement,
+                        statut = "PAID"
+                    ))
+                } catch (e: Exception) {
+                    android.util.Log.e("MainViewModel", "Remote payment sync failed: ${e.message}")
+                }
             }
 
             // Insert tracking log
@@ -668,6 +811,18 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
             val colis = repository.getColisById(colisId) ?: return@launch
             val updatedColis = colis.copy(statut = nextStatus)
             repository.updateColis(updatedColis)
+
+            // Sync status update with backend
+            try {
+                RFactoApi.getInstance().updateColisStatus(com.rfacto.shipping.data.api.UpdateColisStatusRequest(
+                    colisId = colisId,
+                    statut = nextStatus,
+                    lieu = lieu,
+                    commentaire = commentaire
+                ))
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Remote status update failed: ${e.message}")
+            }
 
             // Insert suivi tracking entry
             repository.insertSuivi(Suivi(
@@ -762,6 +917,49 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
     /**
      * Upload photo using Signed URL logic (Cloudinary/S3)
      */
+    suspend fun uploadParcelPhoto(uri: String): String? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val api = RFactoApi.getInstance()
+                val fileName = "parcel_${System.currentTimeMillis()}.jpg"
+                val response = api.getColisUploadUrl(fileName, "image/jpeg")
+                
+                if (response.isSuccessful && response.body() != null) {
+                    val uploadData = response.body()!!
+                    val uploadUrl = uploadData.uploadUrl
+                    val publicUrl = uploadData.publicUrl
+
+                    if (contentResolver != null) {
+                        val inputStream = contentResolver.openInputStream(Uri.parse(uri))
+                        val bytes = inputStream?.readBytes()
+                        inputStream?.close()
+
+                        if (bytes != null) {
+                            val client = OkHttpClient()
+                            val requestBody = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                            val uploadRequest = Request.Builder()
+                                .url(uploadUrl)
+                                .put(requestBody)
+                                .build()
+
+                            val uploadResponse = client.newCall(uploadRequest).execute()
+                            if (uploadResponse.isSuccessful) {
+                                return@withContext publicUrl
+                            } else {
+                                android.util.Log.e("MainViewModel", "Binary upload failed: ${uploadResponse.message}")
+                            }
+                        }
+                    }
+                } else {
+                    android.util.Log.e("MainViewModel", "Failed to get signed URL: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Parcel photo upload failed: ${e.localizedMessage}")
+            }
+            null
+        }
+    }
+
     fun uploadAndSetProfilePhoto(uri: String) {
         viewModelScope.launch {
             try {
@@ -774,12 +972,38 @@ class MainViewModel(private val repository: AppRepository) : ViewModel() {
                 
                 if (response.isSuccessful && response.body() != null) {
                     val uploadData = response.body()!!
-                    
-                    // 2. Perform direct upload to S3/Cloudinary (Simulated here, requires OkHttp put)
-                    // In a real scenario, we would use OkHttpClient to PUT the file to uploadData.uploadUrl
+                    val uploadUrl = uploadData.uploadUrl
+                    val publicUrl = uploadData.publicUrl
+
+                    // 2. Perform direct upload to S3/Cloudinary using OkHttp
+                    if (contentResolver != null) {
+                        withContext(Dispatchers.IO) {
+                            val inputStream = contentResolver.openInputStream(Uri.parse(uri))
+                            val bytes = inputStream?.readBytes()
+                            inputStream?.close()
+
+                            if (bytes != null) {
+                                val client = OkHttpClient()
+                                val requestBody = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                                val uploadRequest = Request.Builder()
+                                    .url(uploadUrl)
+                                    .put(requestBody)
+                                    .build()
+
+                                val uploadResponse = client.newCall(uploadRequest).execute()
+                                if (!uploadResponse.isSuccessful) {
+                                    throw Exception("Failed to upload to storage: ${uploadResponse.message}")
+                                }
+                            } else {
+                                throw Exception("Could not read image data")
+                            }
+                        }
+                    } else {
+                        // Fallback/Simulated if contentResolver is null (e.g. in tests)
+                        android.util.Log.w("MainViewModel", "ContentResolver is null, skipping actual binary upload")
+                    }
                     
                     // 3. Update local and remote profile with the public URL
-                    val publicUrl = uploadData.publicUrl
                     updateProfilePhoto(publicUrl)
                     
                     // Sync with backend
